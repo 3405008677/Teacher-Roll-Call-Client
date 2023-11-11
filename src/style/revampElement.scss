@@ -1,0 +1,21 @@
+$--my-font--color: #fff;
+
+/* 滚动条
+------------------------------- */
+html::-webkit-scrollbar {
+  width: 10px !important;
+}
+html::-webkit-scrollbar-track {
+  background: linear-gradient(rgba(181, 255, 173, 0.79), rgba(158, 255, 239, 0.862)) !important;
+  border-radius: 2px !important;
+}
+html::-webkit-scrollbar-thumb {
+  background: linear-gradient(rgba(71, 185, 255, 0.648), rgba(55, 112, 255, 0.785)) !important;
+  border-radius: 10px !important;
+}
+
+.el-from {
+  @at-root .el-form-item {
+    margin-bottom: 0px !important;
+  }
+}
