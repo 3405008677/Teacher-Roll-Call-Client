@@ -61,7 +61,6 @@ export default defineStore('user', {
     async getRouterList() {
       let { data } = await userApi.getRouterMenuListApi()
       data = formattingRouter(data)
-      console.log(data,'格式化后路由')
       addRouterList(data)
       setRouterList(data)
       this.routerList = data

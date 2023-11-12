@@ -1,6 +1,7 @@
 import type { Router } from 'vue-router'
-import { getToken, getRouterNameList, getRouterList } from '@/utils/auth'
+import { getToken, getRouterList } from '@/utils/auth'
 import nProgress from 'nprogress'
+import { addRouterList } from '../index'
 import { userStore } from '@/store'
 import { ElNotification, ElLoading } from 'element-plus'
 // nprogres state
@@ -31,9 +32,14 @@ export function beforeEach(router: Router) {
       // 判断路由是否存在  不存在则进入（）
       if (!router.hasRoute(to.name!)) {
         // 判断本地是否有路由，如果有路由则是因为刷新导致路由丢失，重新渲染
-        let localRouter = getRouterNameList()
-        if (getRouterList() && localRouter.includes(to.path)) {
-          userStore.getRouterList(userStore.userInfo.uid).then((res) => {
+        let localRouter = getRouterList() as RouteRule[]
+        let isRouter: boolean = false
+        localRouter.forEach((item) => {
+          if (item.name === to.path) isRouter = true
+        })
+        if (isRouter) {
+          userStore.getRouterList().then((res) => {
+            addRouterList(localRouter)
             return next({ path: to.fullPath, replace: true, query: to.query })
           })
         } else {

@@ -30,17 +30,6 @@ const getRouterList = () => {
   return Session.get('ROUTER-LIST')
 }
 
-// storage routers name
-const setRouterNameList = (value: Array<string> | string) => {
-  // 扁平化 + 去重
-  value = Array.from(new Set(getRouterNameList()).add(value)).flat() as unknown as string
-  return Session.set('ROUTER-NAME-LIST', value)
-}
-
-// gain routers name
-const getRouterNameList = () => {
-  return Session.get('ROUTER-NAME-LIST')
-}
 // quit login
 const removeToken = () => {
   return Session.remove('TOKEN')
@@ -53,7 +42,5 @@ export {
   getToken,
   setRouterList,
   getRouterList,
-  setRouterNameList,
-  getRouterNameList,
   removeToken,
 }

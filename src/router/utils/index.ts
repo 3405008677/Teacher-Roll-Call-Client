@@ -28,11 +28,9 @@ export const changeUrl = (url: string, key: string, keyVal: string) => {
 
 export const formattingRouter = (router: Array<MyRouter>, father?: number) => {
   let temp: Array<RouteRule> = []
-  console.log(router[0])
   router.forEach((item,index)=>{
     let v = {} as RouteRule
     v.meta = {}
-
     v.path = item.path
     v.name = item.path
     v.meta.icon = item.icon

@@ -22,7 +22,6 @@ export const router = createRouter({
  * addition router list
  */
 export function addRouterList(routerList: Array<RouteRule>, father: string = '/') {
-  // export function addRouterList(routerList: Array<RouteRule>) {
   routerList.forEach((item: RouteRule) => {
     if (!router.hasRoute(item.name)) {
       router.addRoute(father, item as RouteRecordRaw)
