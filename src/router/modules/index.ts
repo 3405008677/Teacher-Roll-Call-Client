@@ -6,8 +6,8 @@ export default [
     name: '/',
     redirect: '/home',
     // component: () => import('@/layouts/default/index.vue'), //后台管理形式
-    component: () => import('@/layouts/page/main.vue'),//单页面形式
-    children: [text],
+    component: () => import('@/layouts/page/main.vue'), //单页面形式
+    children: text,
   },
   {
     path: '/login',

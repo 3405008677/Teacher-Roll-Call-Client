@@ -12,6 +12,11 @@ dist
 dist-ssr
 *.local
 
+package-lock.json
+
+types/AutoImportElement.d.ts
+types/AutoImportVue.d.ts
+
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
