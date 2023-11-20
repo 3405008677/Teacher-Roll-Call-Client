@@ -34,7 +34,7 @@
   const objectList: CSS3DObject[] = []
   onMounted(() => {
     Three = new T(ThreeRef.value!, 'CSS')
-    Three.camera.position.z = 1000
+    Three.cameraPositionSet({ x: 0, y: 0, z: 1200 }, { x: 0, y: 0, z: 0 })
     nameList.forEach((item, index) => {
       createDivElement(index)
     })
@@ -54,6 +54,12 @@
      * m:50，【8，7】
      */
 
+    ThreeRef.value?.addEventListener('click', (ev) => {
+      let cssDom = Three.getRaycasterPosition(ev.clientX, ev.clientY, objectList)
+      console.log(cssDom)
+    })
+    // 放大Div
+    function magnifyDiv() {}
     // 矩阵排列Dom元素
     function permutationDom() {
       const [row, col] = calculateSquareRoot(nameList.length)
@@ -132,22 +138,6 @@
       }
       return [MCeil, NFloor]
     }
-  }
-  function findDimensions(m: number) {
-    let minDifference = Infinity
-    let result = [0, 0]
-    for (let M = 1; M <= m; M++) {
-      for (let N = 1; N <= m; N++) {
-        if (M * N - m >= 0 && M * N - m <= Math.min(M, N)) {
-          let difference = Math.pow(M - N, 2)
-          if (difference < minDifference) {
-            minDifference = difference
-            result = [M, N]
-          }
-        }
-      }
-    }
-    return result
   }
 </script>
 <style lang="scss">
