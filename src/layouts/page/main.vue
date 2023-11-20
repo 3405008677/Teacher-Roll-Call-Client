@@ -1,5 +1,5 @@
 <template>
-  <div class="bg-red h100%" style="padding: 40px 80px">
+  <div id="main" class="bg-red h100%" style="padding: 40px 80px">
     <div class="bg-green h100% relative b-rd-10px p-10px">
       <div> <TopVue /> </div>
       <div
@@ -21,4 +21,8 @@
   import IndexVue from './index.vue'
   import TopVue from './top.vue'
 </script>
-<style lang="scss"></style>
+<style lang="scss" scoped>
+  #main {
+    background: url('/public/images/bg.png');
+  }
+</style>
