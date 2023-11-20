@@ -76,8 +76,8 @@
         }
       }
       Three.cameraPositionSet(
-        { x: (row * 200) / 2, y: (col * 200) / 2, z: 600 },
-        { x: (row * 200) / 2, y: (col * 200) / 2, z: 600 },
+        { x: (row * 200) / 2, y: (col * 200) / 2, z: 1200 },
+        { x: (row * 200) / 2, y: (col * 200) / 2, z: 0 },
       )
       return newList
     }

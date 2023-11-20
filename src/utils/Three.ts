@@ -135,11 +135,17 @@ class Three {
       y: position.y,
       z: position.z,
       onUpdate: () => {
+        console.log(target)
         this.camera.lookAt(target.x, target.y, target.z) // 观察物体的中心
         this.controls.update()
       },
       onStart: () => {
         this.controls.dispatchEvent({ type: 'start' })
+        gsap.to(this.controls.target, {
+          x: target.x,
+          y: target.y,
+          z: target.z,
+        })
       },
       onComplete: () => {
         this.controls.dispatchEvent({ type: 'end' })
