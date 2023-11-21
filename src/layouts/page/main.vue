@@ -20,7 +20,7 @@
         <el-icon class="mb-20px hvr-wobble-vertical" size="30"><MoreFilled /></el-icon>
         <el-icon class="hvr-wobble-vertical" size="30"><TrendCharts /></el-icon>
       </div>
-      <el-divider class="mt-10px!" border-style="double" style="border-top: 1px solid #90a2c7" />
+      <el-divider class="mt-10px! mb-10px!" border-style="double" style="border-top: 1px solid #90a2c7" />
       <div id="container" class="flex-1">
         <IndexVue />
       </div>

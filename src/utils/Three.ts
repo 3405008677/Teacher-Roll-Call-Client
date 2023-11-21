@@ -80,7 +80,6 @@ class Three {
           this.modelArr.push({ id: modelId, model, mixer, animation: gltf.animations })
           callback(model, gltf.animations)
           this.scene.add(model)
-          console.log(gltf.scene.children[0] === gltf.scene)
           resolve(true)
         })
       } else if (url.split('.').at(-1) === 'gltf') {
@@ -135,7 +134,6 @@ class Three {
       y: position.y,
       z: position.z,
       onUpdate: () => {
-        console.log(target)
         this.camera.lookAt(target.x, target.y, target.z) // 观察物体的中心
         this.controls.update()
       },
@@ -436,8 +434,8 @@ class Three {
   getRaycasterPosition(x: number, y: number, children?: any[]): any {
     const raycaster = new THREE.Raycaster()
     raycaster.setFromCamera(this.screenPositionToGLPosition(x, y), this.camera)
-    // const intersectedObjects = raycaster.intersectObjects(this.scene.children, true); // 是否递归查询子对象
-    const intersectedObjects = raycaster.intersectObjects(children ? children : this.scene.children)
+    const intersectedObjects = raycaster.intersectObjects(children ? children : this.scene.children, true); // 是否递归查询子对象
+    // const intersectedObjects = raycaster.intersectObjects(children ? children : this.scene.children)
     if (intersectedObjects.length > 0) {
       // 获取第一个相交的模型对象
       let firstIntersectedObject = intersectedObjects[0]
