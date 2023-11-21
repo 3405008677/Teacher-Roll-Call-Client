@@ -119,7 +119,7 @@ interface BDataType {
   [key: string]: any
 }
 export class indexDB {
-  private db: IDBDatabase
+  private db!: IDBDatabase
   constructor(private dbName: string) {}
   /**
    * 打开数据库

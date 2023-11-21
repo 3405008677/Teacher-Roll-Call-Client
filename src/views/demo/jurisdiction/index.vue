@@ -1,21 +1,25 @@
 <template>
   <div id="ThreeContainer" ref="ThreeContainer" class="relative h100%">
     <div ref="ThreeRef" class="absolute w100% h100%"></div>
-    <div class="absolute right-0 z10" @click="toggle">
+    <div class="absolute right-20px top-10px z10" @click="toggle">
       <el-tooltip class="box-item" effect="dark" content="全屏" placement="right">
         <el-icon size="30" color="#00fffff2"><FullScreen /></el-icon>
       </el-tooltip>
     </div>
+    <div class="startDom">
+      <p>{{ startText }}</p>
+    </div>
   </div>
 </template>
 <script lang="ts" setup>
-  import T, { CSS3DObject, CSS3DRenderer, THREE } from '@/utils/Three'
+  import T, { CSS3DObject, THREE } from '@/utils/Three'
   import { gsap } from 'gsap'
   import { useFullscreen } from '@vueuse/core'
+  import { appStore } from '@/store'
   let Three: T
   const ThreeRef = ref<HTMLDivElement>()
   const ThreeContainer = ref<HTMLDivElement>()
-  const { toggle, isFullscreen } = useFullscreen(ThreeContainer)
+  const { toggle } = useFullscreen(ThreeContainer)
   const nameList = [
     { name: '彭于晏', gender: '男' },
     { name: '吴彦祖', gender: '男' },
@@ -43,9 +47,13 @@
   let interval: number = 200,
     row: number,
     col: number
-  // 是否有放大Div了
-  let isMagnifyDiv = false
-  let oldActive: number
+
+  let isMagnifyDiv = false // 是否有放大Div了
+  let scaleNumber = 2
+  let oldActive: number // 放大倍数
+  let startText = ref('开始')
+
+  appStore.setTitle('随机抽取一位幸运观众')
 
   onMounted(() => {
     Three = new T(ThreeRef.value!, 'CSS')
@@ -57,17 +65,43 @@
     DivCreateEvent()
     createParticle(4000)
     permutationDom()
+    init()
+    function init() {
+      const startDom = document.querySelector('.startDom') as HTMLDivElement
+      startDom.addEventListener('pointerdown', () => {
+        CallStart()
+        if (startText.value === '开始') {
+          startText.value = '结束'
+        } else if (startText.value === '结束') {
+          isMagnifyDiv = false
+          startText.value = '开始'
+        }
+      })
+      const css3DObject = new CSS3DObject(startDom)
+      css3DObject.position.x = (row * 200) / 2 - 100
+      css3DObject.position.y = col * 200 + 100
+      css3DObject.position.z = interval
+      Three.scene.add(css3DObject)
+    }
+
+    function CallStart() {
+      const randomIndex = Math.floor(Math.random() * nameList.length)
+      // 返回数组中对应随机索引的值
+      CarSizeFun(randomIndex)
+      return
+    }
+
     // 放大Div
     function DivMagnify(index: number) {
       gsap.to(CSS3DObjectList[index].position, {
-        x: (interval * row) / 2 - (domeObjectList[index].clientWidth / 2) * 1.5,
+        x: (interval * row) / 2 - (domeObjectList[index].clientWidth / 2) * scaleNumber,
         y: (interval * col) / 2 - domeObjectList[index].clientHeight / 2,
         z: (CSS3DObjectList[index].position.z += 150),
       })
       gsap.to(CSS3DObjectList[index].scale, {
-        x: 1.5,
-        y: 1.5,
-        z: 1.5,
+        x: scaleNumber,
+        y: scaleNumber,
+        z: scaleNumber,
       })
     }
     // 恢复Div大小
@@ -78,24 +112,27 @@
         z: 1,
       })
     }
+    // 卡片放大缩小逻辑
+    async function CarSizeFun(index: number) {
+      if (!isMagnifyDiv) {
+        isMagnifyDiv = true
+        oldActive = index
+        DivMagnify(index)
+        console.log(1)
+        return
+      }
+      isMagnifyDiv = false
+      DivResize(oldActive)
+      DivResize(oldActive)
+      await permutationDom()
+    }
     // 给卡片添加点击事件
     function DivCreateEvent() {
       domeObjectList.forEach((item, index) => {
-        item.addEventListener('pointerdown', async (event) => {
+        item.addEventListener('pointerdown', (event) => {
           event.stopPropagation()
           // 如果当前没有放大的元素就进入
-          if (!isMagnifyDiv) {
-            isMagnifyDiv = true
-            oldActive = index
-            DivMagnify(index)
-            console.log(1)
-            return
-          }
-          isMagnifyDiv = false
-          DivResize(oldActive)
-          DivResize(oldActive)
-          await permutationDom()
-          console.log(2)
+          CarSizeFun(index)
         })
       })
     }
@@ -286,6 +323,23 @@
       bottom: 15px;
       font-size: 12px;
       color: rgba(127, 255, 255, 0.75);
+    }
+  }
+  .startDom {
+    width: 160px;
+    height: 160px;
+    border: 1px solid rgba(218, 82, 82, 0.25);
+    box-shadow: 0 0 12px rgb(255, 0, 0);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    border-radius: 50%;
+    color: #fff;
+    font-size: 36px;
+    background-color: rgba(216, 41, 41, 0.442);
+    &:hover {
+      border: 1px solid rgba(248, 75, 75, 0.75);
+      box-shadow: 0 0 12px rgb(255, 32, 32);
     }
   }
 </style>

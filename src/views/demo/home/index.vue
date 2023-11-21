@@ -1,5 +1,8 @@
 <template>
-  <div>Home</div>
+  <div>home</div>
 </template>
-<script lang="ts" setup></script>
+<script lang="ts" setup>
+  import { appStore } from '@/store'
+  appStore.setTitle('主页')
+</script>
 <style lang="scss"></style>

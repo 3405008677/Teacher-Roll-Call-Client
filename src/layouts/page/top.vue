@@ -1,6 +1,6 @@
 <template>
   <div class="flex items-center justify-between">
-    <h1>标题</h1>
+    <h1>{{ appStore.title }}</h1>
     <div class="flex items-center">
       <el-input
         v-model="inputText"
@@ -28,7 +28,7 @@
 </template>
 <script lang="ts" setup>
   import { Search } from '@element-plus/icons-vue'
-  import { userStore } from '@/store'
+  import { userStore, appStore } from '@/store'
   const inputText = ref('')
   const avatarImgUrl = ref('/public/avatar/1.jpg')
 </script>

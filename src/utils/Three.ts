@@ -2,6 +2,8 @@ import * as THREE from 'three'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRenderer.js'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
+import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
+import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { gsap } from 'gsap'
 import Stats from 'stats.js'
 /**
@@ -391,6 +393,38 @@ class Three {
     floorMesh.rotation.x = -Math.PI / 2.0
     this.scene.add(floorMesh)
   }
+  textCreate(config: {
+    text: string
+    color?: any
+    size?: number
+    position?: { x: number; y: number; z: number }
+  }): Promise<THREE.Mesh<TextGeometry, THREE.Material | THREE.Material[], THREE.Object3DEventMap>> {
+    return new Promise((resolve, reject) => {
+      config.color ? '' : (config.color = 0x00ff00)
+      config.size ? '' : (config.size = 16)
+      let textMesh: THREE.Mesh<TextGeometry>
+      const fontLoader = new FontLoader()
+      fontLoader.load('/public/font/optimer_bold.typeface.json', (loadedFont) => {
+        const textGeometry = new TextGeometry(config.text, {
+          font: loadedFont,
+          size: config.size,
+          height: 1,
+          curveSegments: 12,
+          bevelEnabled: true,
+          bevelThickness: 0.6,
+          bevelSize: 0.3,
+          bevelSegments: 5,
+        })
+        const textMaterial = new THREE.MeshBasicMaterial({ color: config.color })
+        textMesh = new THREE.Mesh(textGeometry, textMaterial)
+        config.position
+          ? textMesh.position.set(config.position.x, config.position.y, config.position.z)
+          : ''
+        this.scene.add(textMesh)
+        resolve(textMesh)
+      })
+    })
+  }
   /*************************************************************************************************************************
    * 工具
    */
@@ -434,7 +468,10 @@ class Three {
   getRaycasterPosition(x: number, y: number, children?: any[]): any {
     const raycaster = new THREE.Raycaster()
     raycaster.setFromCamera(this.screenPositionToGLPosition(x, y), this.camera)
-    const intersectedObjects = raycaster.intersectObjects(children ? children : this.scene.children, true); // 是否递归查询子对象
+    const intersectedObjects = raycaster.intersectObjects(
+      children ? children : this.scene.children,
+      true,
+    ) // 是否递归查询子对象
     // const intersectedObjects = raycaster.intersectObjects(children ? children : this.scene.children)
     if (intersectedObjects.length > 0) {
       // 获取第一个相交的模型对象
