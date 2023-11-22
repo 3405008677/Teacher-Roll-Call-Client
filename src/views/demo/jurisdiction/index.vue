@@ -6,6 +6,16 @@
         <el-icon size="30" color="#00fffff2"><FullScreen /></el-icon>
       </el-tooltip>
     </div>
+    <div class="absolute right-20px top-50px z10" @click="permutationDomSphere">
+      <el-tooltip class="box-item" effect="dark" content="球形" placement="right">
+        <el-icon size="30" color="#00fffff2"><Football /></el-icon>
+      </el-tooltip>
+    </div>
+    <div class="absolute right-20px top-90px z10" @click="permutationDom">
+      <el-tooltip class="box-item" effect="dark" content="平面" placement="right">
+        <el-icon size="30" color="#00fffff2"><Box /></el-icon>
+      </el-tooltip>
+    </div>
     <div class="startDom">
       <p>{{ startText }}</p>
     </div>
@@ -21,78 +31,111 @@
   const ThreeContainer = ref<HTMLDivElement>()
   const { toggle } = useFullscreen(ThreeContainer)
   const nameList = [
+    { name: '陈冠希', gender: '男' },
     { name: '彭于晏', gender: '男' },
+    { name: '韩红', gender: '女' },
+    { name: '吴彦祖', gender: '男' },
+    { name: '彭于晏', gender: '男' },
+    { name: '韩红', gender: '女' },
     { name: '吴彦祖', gender: '男' },
     { name: '陈冠希', gender: '男' },
     { name: '韩红', gender: '女' },
     { name: '彭于晏', gender: '男' },
     { name: '吴彦祖', gender: '男' },
+    { name: '韩红', gender: '女' },
     { name: '陈冠希', gender: '男' },
     { name: '韩红', gender: '女' },
     { name: '彭于晏', gender: '男' },
+    { name: '韩红', gender: '女' },
     { name: '吴彦祖', gender: '男' },
     { name: '陈冠希', gender: '男' },
     { name: '韩红', gender: '女' },
     { name: '彭于晏', gender: '男' },
-    { name: '吴彦祖', gender: '男' },
-    { name: '陈冠希', gender: '男' },
     { name: '韩红', gender: '女' },
-    { name: '彭于晏', gender: '男' },
     { name: '吴彦祖', gender: '男' },
+    { name: '韩红', gender: '女' },
     { name: '陈冠希', gender: '男' },
     { name: '韩红', gender: '女' },
   ]
   const CSS3DObjectList: CSS3DObject[] = []
   const domeObjectList: HTMLDivElement[] = []
   let interval: number = 200,
+    distance: number = 0,
+    cameraDistance: number = 1200,
     row: number,
     col: number
-
-  let isMagnifyDiv = false // 是否有放大Div了
+  let CarStart = {
+    position: { x: 0, y: 0, z: 0 },
+    rotation: { x: 0, y: 0, z: 0 },
+  }
+  let isMagnifyDiv = ref(false) // 是否有放大Div了
   let scaleNumber = 2
   let oldActive: number // 放大倍数
   let startText = ref('开始')
-
   appStore.setTitle('随机抽取一位幸运观众')
 
   onMounted(() => {
     Three = new T(ThreeRef.value!, 'CSS')
-    Three.cameraPositionSet({ x: 0, y: 0, z: 1200 }, { x: 0, y: 0, z: 0 })
+    Three.cameraPositionSet({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 })
     // 创建卡片
     nameList.forEach((item, index) => {
       createDivElement(index)
     })
-    DivCreateEvent()
-    createParticle(4000)
-    permutationDom()
-    init()
     function init() {
-      const startDom = document.querySelector('.startDom') as HTMLDivElement
-      startDom.addEventListener('pointerdown', () => {
-        CallStart()
-        if (startText.value === '开始') {
-          startText.value = '结束'
-        } else if (startText.value === '结束') {
-          isMagnifyDiv = false
-          startText.value = '开始'
-        }
-      })
-      const css3DObject = new CSS3DObject(startDom)
-      css3DObject.position.x = (row * 200) / 2 - 100
-      css3DObject.position.y = col * 200 + 100
-      css3DObject.position.z = interval
-      Three.scene.add(css3DObject)
+      DivCreateEvent()
+      createParticle(4000)
+      permutationDom()
+      CallInit()
     }
-
+    // 抽人逻辑
     function CallStart() {
       const randomIndex = Math.floor(Math.random() * nameList.length)
       // 返回数组中对应随机索引的值
       CarSizeFun(randomIndex)
       return
     }
-
+    // 初始化抽人
+    function CallInit() {
+      watch(
+        () => isMagnifyDiv.value,
+        (newValue) => {
+          if (newValue === true) startText.value = '结束'
+          if (newValue === false) startText.value = '开始'
+        },
+      )
+      const startDom = document.querySelector('.startDom') as HTMLDivElement
+      startDom.addEventListener('pointerdown', () => {
+        CallStart()
+        if (startText.value === '开始') {
+          startText.value = '结束'
+        } else if (startText.value === '结束') {
+          isMagnifyDiv.value = false
+          startText.value = '开始'
+        }
+      })
+      const css3DObject = new CSS3DObject(startDom)
+      css3DObject.position.x = (row * 200) / 2 - 100
+      css3DObject.position.y = col * 200 + 100
+      css3DObject.position.z = distance
+      Three.scene.add(css3DObject)
+    }
     // 放大Div
     function DivMagnify(index: number) {
+      let Vector = new THREE.Object3D()
+      Vector.position.set(
+        CSS3DObjectList[oldActive].position.x,
+        CSS3DObjectList[oldActive].position.y,
+        CSS3DObjectList[oldActive].position.z,
+      )
+      Vector.rotation.set(
+        CSS3DObjectList[oldActive].rotation.x,
+        CSS3DObjectList[oldActive].rotation.y,
+        CSS3DObjectList[oldActive].rotation.z,
+      )
+      CarStart.position = Vector.position
+      CarStart.rotation = Vector.rotation
+      console.log(CarStart.position)
+
       gsap.to(CSS3DObjectList[index].position, {
         x: (interval * row) / 2 - (domeObjectList[index].clientWidth / 2) * scaleNumber,
         y: (interval * col) / 2 - domeObjectList[index].clientHeight / 2,
@@ -111,20 +154,29 @@
         y: 1,
         z: 1,
       })
+      gsap.to(CSS3DObjectList[index].position, {
+        x: CarStart.position.x,
+        y: CarStart.position.y,
+        z: CarStart.position.z,
+      })
+      gsap.to(CSS3DObjectList[index].rotation, {
+        x: CarStart.rotation.x,
+        y: CarStart.rotation.y,
+        z: CarStart.rotation.z,
+      })
     }
+
     // 卡片放大缩小逻辑
     async function CarSizeFun(index: number) {
-      if (!isMagnifyDiv) {
-        isMagnifyDiv = true
+      if (!isMagnifyDiv.value) {
+        isMagnifyDiv.value = true
         oldActive = index
         DivMagnify(index)
-        console.log(1)
         return
       }
-      isMagnifyDiv = false
+      isMagnifyDiv.value = false
       DivResize(oldActive)
-      DivResize(oldActive)
-      await permutationDom()
+      // permutationDom()
     }
     // 给卡片添加点击事件
     function DivCreateEvent() {
@@ -137,7 +189,7 @@
       })
     }
     // 矩阵排列Dom元素
-    function permutationDom() {
+    permutationDom = () => {
       return new Promise((resolve, reject) => {
         ;[row, col] = calculateSquareRoot(nameList.length)
         let newList: CSS3DObject[][] = []
@@ -145,25 +197,52 @@
         for (let i = 0; i < row; i++) {
           newList.push([])
           for (let j = 0; j < col; j++) {
-            if (!CSS3DObjectList[index]) return
+            if (!CSS3DObjectList[index]) break
             newList[i].push(CSS3DObjectList[index])
             gsap.to(CSS3DObjectList[index].position, {
               x: i * interval,
               y: j * interval,
-              z: interval,
+              z: distance,
               onUpdate: () => {},
               onStart: () => {},
               onComplete: () => {},
             })
+            gsap.to(CSS3DObjectList[index].rotation, { x: 0, y: 0, z: 0 })
             index++
           }
         }
         Three.cameraPositionSet(
-          { x: (row * interval) / 2, y: (col * interval) / 2, z: 1200 },
+          { x: (row * interval) / 2, y: (col * interval) / 2, z: cameraDistance },
           { x: (row * interval) / 2, y: (col * interval) / 2, z: 0 },
         )
         resolve(newList)
       })
+    }
+    // 球形排列Dom元素
+    permutationDomSphere = () => {
+      ;[row, col] = calculateSquareRoot(nameList.length)
+      row = (row * 200) / 2 - 100
+      col = (col * 200) / 2
+      const vector = new THREE.Vector3()
+      for (let i = 0, l = nameList.length; i < l; i++) {
+        const phi = Math.acos(-1 + (2 * i) / l)
+        const theta = Math.sqrt(l * Math.PI) * phi
+        const object = new THREE.Object3D()
+        object.position.setFromSphericalCoords(400, phi, theta)
+        vector.copy(object.position).multiplyScalar(2)
+        object.lookAt(vector)
+        gsap.to(CSS3DObjectList[i].position, {
+          x: (object.position.x += row),
+          y: (object.position.y += col),
+          z: (object.position.z += distance),
+        })
+        gsap.to(CSS3DObjectList[i].rotation, {
+          x: object.rotation.x,
+          y: object.rotation.y,
+          z: object.rotation.z,
+        })
+      }
+      Three.cameraPositionSet({ x: row, y: col, z: 120 }, { x: row, y: col, z: 0 })
     }
     // 创建卡片
     function createDivElement(index: number) {
@@ -251,7 +330,11 @@
       ThreeRef.value!.style.width = `${container?.clientWidth}px`
       Three.cameraResize()
     })
+    init()
   })
+  // 球形排列Dom元素
+  let permutationDomSphere = () => {}
+  let permutationDom = () => {}
 
   function calculateSquareRoot(m: number): [number, number] {
     const squareRoot: number = Math.sqrt(m)
