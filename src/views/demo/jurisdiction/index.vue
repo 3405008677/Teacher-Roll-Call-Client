@@ -221,7 +221,7 @@
     // 球形排列Dom元素
     permutationDomSphere = () => {
       ;[row, col] = calculateSquareRoot(nameList.length)
-      row = (row * 200) / 2 - 100
+      row = (row * 200) / 2
       col = (col * 200) / 2
       const vector = new THREE.Vector3()
       for (let i = 0, l = nameList.length; i < l; i++) {
@@ -232,7 +232,7 @@
         vector.copy(object.position).multiplyScalar(2)
         object.lookAt(vector)
         gsap.to(CSS3DObjectList[i].position, {
-          x: (object.position.x += row),
+          x: (object.position.x += row) - 100,
           y: (object.position.y += col),
           z: (object.position.z += distance),
         })
@@ -242,7 +242,7 @@
           z: object.rotation.z,
         })
       }
-      Three.cameraPositionSet({ x: row, y: col, z: 120 }, { x: row, y: col, z: 0 })
+      Three.cameraPositionSet({ x: row, y: col, z: cameraDistance }, { x: row, y: col, z: 0 })
     }
     // 创建卡片
     function createDivElement(index: number) {
