@@ -30,7 +30,7 @@
   import { Search } from '@element-plus/icons-vue'
   import { userStore, appStore } from '@/store'
   const inputText = ref('')
-  const avatarImgUrl = ref('/public/avatar/1.jpg')
+  const avatarImgUrl = ref('/avatar/1.jpg')
 </script>
 <style lang="scss" scoped>
   :deep(.el-input__wrapper) {

@@ -26,12 +26,31 @@
   import { gsap } from 'gsap'
   import { useFullscreen } from '@vueuse/core'
   import { appStore } from '@/store'
+  import userApi from '@/api/user'
+  import { Session } from '@/utils/storage'
   let Three: T
   const ThreeRef = ref<HTMLDivElement>()
   const ThreeContainer = ref<HTMLDivElement>()
   const { toggle } = useFullscreen(ThreeContainer)
+
+  userApi.getStudentList('1').then((data) => {
+    console.log(data)
+  })
   const nameList = [
+    { name: '韩红', gender: '女' },
+    { name: '吴彦祖', gender: '男' },
     { name: '陈冠希', gender: '男' },
+    { name: '韩红', gender: '女' },
+    { name: '彭于晏', gender: '男' },
+    { name: '吴彦祖', gender: '男' },
+    { name: '韩红', gender: '女' },
+    { name: '陈冠希', gender: '男' },
+    { name: '韩红', gender: '女' },
+    { name: '彭于晏', gender: '男' },
+    { name: '韩红', gender: '女' },
+    { name: '吴彦祖', gender: '男' },
+    { name: '陈冠希', gender: '男' },
+    { name: '韩红', gender: '女' },
     { name: '彭于晏', gender: '男' },
     { name: '韩红', gender: '女' },
     { name: '吴彦祖', gender: '男' },
@@ -57,6 +76,8 @@
     { name: '陈冠希', gender: '男' },
     { name: '韩红', gender: '女' },
   ]
+  let duration = 1 // 动画帧秒数
+  let ease = 'power1.inOut' // 动画曲线
   const CSS3DObjectList: CSS3DObject[] = []
   const domeObjectList: HTMLDivElement[] = []
   let interval: number = 200,
@@ -86,7 +107,7 @@
     function init() {
       DivCreateEvent()
       createParticle(4000)
-      permutationDomSelect("Plane")
+      permutationDomSelect('Plane')
       CallInit()
     }
     // 抽人逻辑
@@ -143,32 +164,44 @@
           x: 400,
           y: 400,
           z: 500,
+          duration,
+          ease,
         })
         gsap.to(CSS3DObjectList[index].rotation, {
           x: 0,
           y: 0,
           z: 0,
+          duration,
+          ease,
         })
         gsap.to(CSS3DObjectList[index].scale, {
           x: scaleNumber,
           y: scaleNumber,
           z: scaleNumber,
+          duration,
+          ease,
         })
       } else if (DomType === 'Plane') {
         gsap.to(CSS3DObjectList[index].position, {
           x: (interval * row) / 2 - (domeObjectList[index].clientWidth / 2) * scaleNumber,
           y: (interval * col) / 2 - domeObjectList[index].clientHeight / 2,
           z: (CSS3DObjectList[index].position.z += 150),
+          duration,
+          ease,
         })
         gsap.to(CSS3DObjectList[index].scale, {
           x: scaleNumber,
           y: scaleNumber,
           z: scaleNumber,
+          duration,
+          ease,
         })
         gsap.to(CSS3DObjectList[index].rotation, {
           x: 0,
           y: 0,
           z: 0,
+          duration,
+          ease,
         })
       }
     }
@@ -178,16 +211,22 @@
         x: 1,
         y: 1,
         z: 1,
+        duration,
+        ease,
       })
       gsap.to(CSS3DObjectList[index].position, {
         x: CarStart.position.x,
         y: CarStart.position.y,
         z: CarStart.position.z,
+        duration,
+        ease,
       })
       gsap.to(CSS3DObjectList[index].rotation, {
         x: CarStart.rotation.x,
         y: CarStart.rotation.y,
         z: CarStart.rotation.z,
+        duration,
+        ease,
       })
     }
     // 卡片放大缩小逻辑
@@ -227,11 +266,13 @@
               x: i * interval,
               y: j * interval,
               z: distance,
+              duration,
+              ease,
               onUpdate: () => {},
               onStart: () => {},
               onComplete: () => {},
             })
-            gsap.to(CSS3DObjectList[index].rotation, { x: 0, y: 0, z: 0 })
+            gsap.to(CSS3DObjectList[index].rotation, { x: 0, y: 0, z: 0, duration, ease })
             index++
           }
         }
@@ -254,18 +295,22 @@
           const phi = Math.acos(-1 + (2 * i) / l)
           const theta = Math.sqrt(l * Math.PI) * phi
           const object = new THREE.Object3D()
-          object.position.setFromSphericalCoords(400, phi, theta)
+          object.position.setFromSphericalCoords(800, phi, theta)
           vector.copy(object.position).multiplyScalar(2)
           object.lookAt(vector)
           gsap.to(CSS3DObjectList[i].position, {
             x: (object.position.x += row) - 100,
             y: (object.position.y += col),
             z: (object.position.z += distance),
+            duration,
+            ease,
           })
           gsap.to(CSS3DObjectList[i].rotation, {
             x: object.rotation.x,
             y: object.rotation.y,
             z: object.rotation.z,
+            duration,
+            ease,
           })
         }
         Three.cameraPositionSet({ x: row, y: col, z: cameraDistance }, { x: row, y: col, z: 0 })
@@ -345,7 +390,8 @@
           const offsetY = Math.random() * 10 - 5
           const offsetZ = Math.random() * 10 - 5
           gsap.to(positions, {
-            duration: 3,
+            duration,
+            ease,
             onUpdate: () => {
               positions[i] += offsetX
               positions[i + 1] += offsetY

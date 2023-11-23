@@ -50,6 +50,7 @@ export default defineStore('user', {
       this.token = ''
       Session.clear()
       resetRouter()
+      location.reload()
     },
     // 获取用户信息
     async getInfo() {

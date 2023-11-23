@@ -5,7 +5,11 @@
         <!-- <img :src="logoMini" /> -->
         <div class="login-icon-group-title-text font25">LOGO</div>
       </div>
-      <img src="/images/login-icon-two.svg" class="login-icon-group-icon" />
+      <img
+        style="user-select: none"
+        src="/images/login-icon-two.svg"
+        class="login-icon-group-icon"
+      />
     </div>
     <div class="login-content">
       <div class="login-content-main">
@@ -178,6 +182,7 @@
         align-items: center;
 
         img {
+          user-select: none;
           width: 30px;
           height: 30px;
         }

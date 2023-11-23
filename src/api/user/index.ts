@@ -14,7 +14,14 @@ const getUserInfoApi = () => {
 const getRouterMenuListApi = () => {
   return request.get('/routerList')
 }
+/**
+ * 获取学生列表
+ */
+const getStudentList = (uid: string) => {
+  return request.get('/student/list', { uid })
+}
 export default {
   getUserInfoApi,
   getRouterMenuListApi,
+  getStudentList,
 }
