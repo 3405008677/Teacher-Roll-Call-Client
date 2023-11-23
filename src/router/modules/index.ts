@@ -1,4 +1,4 @@
-import text from './routerDate' //测试用的路由
+// import text from './routerDate' //测试用的路由
 
 export default [
   {
@@ -7,7 +7,7 @@ export default [
     redirect: '/home',
     // component: () => import('@/layouts/default/index.vue'), //后台管理形式
     component: () => import('@/layouts/page/main.vue'), //单页面形式
-    children: text,
+    children: [],
   },
   {
     path: '/login',
