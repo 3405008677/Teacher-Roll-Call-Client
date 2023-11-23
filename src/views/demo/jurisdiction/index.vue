@@ -6,12 +6,12 @@
         <el-icon size="30" color="#00fffff2"><FullScreen /></el-icon>
       </el-tooltip>
     </div>
-    <div class="absolute right-20px top-50px z10" @click="permutationDomSphere">
+    <div class="absolute right-20px top-50px z10" @click="permutationDomSelect('Sphere')">
       <el-tooltip class="box-item" effect="dark" content="球形" placement="right">
         <el-icon size="30" color="#00fffff2"><Football /></el-icon>
       </el-tooltip>
     </div>
-    <div class="absolute right-20px top-90px z10" @click="permutationDom">
+    <div class="absolute right-20px top-90px z10" @click="permutationDomSelect('Plane')">
       <el-tooltip class="box-item" effect="dark" content="平面" placement="right">
         <el-icon size="30" color="#00fffff2"><Box /></el-icon>
       </el-tooltip>
@@ -67,11 +67,13 @@
   let CarStart = {
     position: { x: 0, y: 0, z: 0 },
     rotation: { x: 0, y: 0, z: 0 },
+    scale: { x: 0, y: 0, z: 0 },
   }
   let isMagnifyDiv = ref(false) // 是否有放大Div了
   let scaleNumber = 2
   let oldActive: number // 放大倍数
   let startText = ref('开始')
+  let DomType = '' // 当前模型现状
   appStore.setTitle('随机抽取一位幸运观众')
 
   onMounted(() => {
@@ -84,7 +86,7 @@
     function init() {
       DivCreateEvent()
       createParticle(4000)
-      permutationDom()
+      permutationDomSelect("Plane")
       CallInit()
     }
     // 抽人逻辑
@@ -120,7 +122,7 @@
       Three.scene.add(css3DObject)
     }
     // 放大Div
-    function DivMagnify(index: number) {
+    let DivMagnify = (index: number) => {
       let Vector = new THREE.Object3D()
       Vector.position.set(
         CSS3DObjectList[oldActive].position.x,
@@ -134,18 +136,41 @@
       )
       CarStart.position = Vector.position
       CarStart.rotation = Vector.rotation
-      console.log(CarStart.position)
+      CarStart.scale = Vector.scale
 
-      gsap.to(CSS3DObjectList[index].position, {
-        x: (interval * row) / 2 - (domeObjectList[index].clientWidth / 2) * scaleNumber,
-        y: (interval * col) / 2 - domeObjectList[index].clientHeight / 2,
-        z: (CSS3DObjectList[index].position.z += 150),
-      })
-      gsap.to(CSS3DObjectList[index].scale, {
-        x: scaleNumber,
-        y: scaleNumber,
-        z: scaleNumber,
-      })
+      if (DomType === 'Sphere') {
+        gsap.to(CSS3DObjectList[index].position, {
+          x: 400,
+          y: 400,
+          z: 500,
+        })
+        gsap.to(CSS3DObjectList[index].rotation, {
+          x: 0,
+          y: 0,
+          z: 0,
+        })
+        gsap.to(CSS3DObjectList[index].scale, {
+          x: scaleNumber,
+          y: scaleNumber,
+          z: scaleNumber,
+        })
+      } else if (DomType === 'Plane') {
+        gsap.to(CSS3DObjectList[index].position, {
+          x: (interval * row) / 2 - (domeObjectList[index].clientWidth / 2) * scaleNumber,
+          y: (interval * col) / 2 - domeObjectList[index].clientHeight / 2,
+          z: (CSS3DObjectList[index].position.z += 150),
+        })
+        gsap.to(CSS3DObjectList[index].scale, {
+          x: scaleNumber,
+          y: scaleNumber,
+          z: scaleNumber,
+        })
+        gsap.to(CSS3DObjectList[index].rotation, {
+          x: 0,
+          y: 0,
+          z: 0,
+        })
+      }
     }
     // 恢复Div大小
     function DivResize(index: number) {
@@ -165,7 +190,6 @@
         z: CarStart.rotation.z,
       })
     }
-
     // 卡片放大缩小逻辑
     async function CarSizeFun(index: number) {
       if (!isMagnifyDiv.value) {
@@ -189,7 +213,7 @@
       })
     }
     // 矩阵排列Dom元素
-    permutationDom = () => {
+    function permutationDom() {
       return new Promise((resolve, reject) => {
         ;[row, col] = calculateSquareRoot(nameList.length)
         let newList: CSS3DObject[][] = []
@@ -215,34 +239,48 @@
           { x: (row * interval) / 2, y: (col * interval) / 2, z: cameraDistance },
           { x: (row * interval) / 2, y: (col * interval) / 2, z: 0 },
         )
+
         resolve(newList)
       })
     }
     // 球形排列Dom元素
-    permutationDomSphere = () => {
-      ;[row, col] = calculateSquareRoot(nameList.length)
-      row = (row * 200) / 2
-      col = (col * 200) / 2
-      const vector = new THREE.Vector3()
-      for (let i = 0, l = nameList.length; i < l; i++) {
-        const phi = Math.acos(-1 + (2 * i) / l)
-        const theta = Math.sqrt(l * Math.PI) * phi
-        const object = new THREE.Object3D()
-        object.position.setFromSphericalCoords(400, phi, theta)
-        vector.copy(object.position).multiplyScalar(2)
-        object.lookAt(vector)
-        gsap.to(CSS3DObjectList[i].position, {
-          x: (object.position.x += row) - 100,
-          y: (object.position.y += col),
-          z: (object.position.z += distance),
-        })
-        gsap.to(CSS3DObjectList[i].rotation, {
-          x: object.rotation.x,
-          y: object.rotation.y,
-          z: object.rotation.z,
-        })
+    function permutationDomSphere() {
+      return new Promise((resolve, reject) => {
+        ;[row, col] = calculateSquareRoot(nameList.length)
+        row = (row * 200) / 2
+        col = (col * 200) / 2
+        const vector = new THREE.Vector3()
+        for (let i = 0, l = nameList.length; i < l; i++) {
+          const phi = Math.acos(-1 + (2 * i) / l)
+          const theta = Math.sqrt(l * Math.PI) * phi
+          const object = new THREE.Object3D()
+          object.position.setFromSphericalCoords(400, phi, theta)
+          vector.copy(object.position).multiplyScalar(2)
+          object.lookAt(vector)
+          gsap.to(CSS3DObjectList[i].position, {
+            x: (object.position.x += row) - 100,
+            y: (object.position.y += col),
+            z: (object.position.z += distance),
+          })
+          gsap.to(CSS3DObjectList[i].rotation, {
+            x: object.rotation.x,
+            y: object.rotation.y,
+            z: object.rotation.z,
+          })
+        }
+        Three.cameraPositionSet({ x: row, y: col, z: cameraDistance }, { x: row, y: col, z: 0 })
+        resolve(true)
+      })
+    }
+    // 切换形状
+    permutationDomSelect = (select: string) => {
+      if (select === 'Sphere') {
+        DomType = select
+        permutationDomSphere()
+      } else if (select === 'Plane') {
+        DomType = select
+        permutationDom()
       }
-      Three.cameraPositionSet({ x: row, y: col, z: cameraDistance }, { x: row, y: col, z: 0 })
     }
     // 创建卡片
     function createDivElement(index: number) {
@@ -333,9 +371,7 @@
     init()
   })
   // 球形排列Dom元素
-  let permutationDomSphere = () => {}
-  let permutationDom = () => {}
-
+  let permutationDomSelect = (select: string) => {}
   function calculateSquareRoot(m: number): [number, number] {
     const squareRoot: number = Math.sqrt(m)
     if (Number.isInteger(squareRoot)) {
