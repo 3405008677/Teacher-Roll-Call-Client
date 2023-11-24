@@ -4,6 +4,8 @@ import { CSS3DRenderer, CSS3DObject } from 'three/examples/jsm/renderers/CSS3DRe
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
+
 import { gsap } from 'gsap'
 import Stats from 'stats.js'
 /**
@@ -28,6 +30,10 @@ interface controlsArrType {
   callbackStart?: Function
   callbackEnd?: Function
 }
+interface transformControlsArrType {
+  id: string
+  transform: any
+}
 interface positionType {
   x: number
   y: number
@@ -40,6 +46,7 @@ class Three {
   renderer!: THREE.WebGLRenderer //
   css3DRender!: CSS3DRenderer
   controls!: OrbitControls // 控制器
+  controlsTransformArr: transformControlsArrType[] = [] // 控制器
   stats!: Stats
   private clockSoul = new THREE.Clock() //
   private type: 'default' | 'CSS'
@@ -179,12 +186,41 @@ class Three {
       if (id === item.id) this.animationFrameArr.splice(index, 1)
     })
   }
+  /**
+   * 控制器事件
+   * @param id
+   * @param callbackStart
+   * @param callbackEnd
+   */
   controlsEventAdd(id: string, callbackStart?: Function, callbackEnd?: Function) {
     this.controlsArr.push({ id, callbackStart, callbackEnd })
   }
   controlsEventDelete(id: string) {
     this.controlsArr.forEach((item, index) => {
       if (id === item.id) this.controlsArr.splice(index, 1)
+    })
+  }
+  /**
+   * 控制器选中
+   * @param id
+   * @param model
+   */
+  controlsSelectAdd(id: string, model: any) {
+    const transformControls = new TransformControls(this.camera, this.renderer.domElement)
+    transformControls.attach(model) // 将你要控制的对象附加到 TransformControls
+    this.controlsTransformArr.push({
+      id,
+      transform: transformControls,
+    })
+    this.scene.add(transformControls)
+  }
+  controlsSelectDelete(id: string) {
+    this.controlsTransformArr.forEach((item, index) => {
+      if (id === item.id) {
+        this.controlsTransformArr.splice(index, 1)
+        item.transform.dispose()
+        this.scene.remove(item.transform)
+      }
     })
   }
   /**
@@ -200,6 +236,7 @@ class Three {
   // 初始化基础变量
   private init() {
     this.scene = new THREE.Scene()
+
     this.camera = new THREE.PerspectiveCamera(
       75,
       this.canvasDom.clientWidth / this.canvasDom.clientHeight,
@@ -211,15 +248,9 @@ class Three {
     // 默认的renderer
     if (this.type === 'default') {
       this.renderer = new THREE.WebGLRenderer({ antialias: true, canvas: this.canvasDom })
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-      this.renderer.shadowMap.enabled = true
-      this.renderer.toneMapping = THREE.ACESFilmicToneMapping
       this.controls = new OrbitControls(this.camera, this.renderer.domElement)
     } else if (this.type === 'CSS') {
       this.renderer = new THREE.WebGLRenderer({ antialias: true })
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-      this.renderer.shadowMap.enabled = true
-      this.renderer.toneMapping = THREE.ACESFilmicToneMapping
       this.css3DRender = new CSS3DRenderer()
       this.css3DRender.domElement.style.position = 'absolute'
       this.css3DRender.domElement.style.top = '0'
@@ -230,6 +261,10 @@ class Three {
       this.animationFrameAdd('css3DRender', () => {
         this.css3DRender.render(this.scene, this.camera)
       })
+      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+      this.renderer.toneMapping = THREE.ACESFilmicToneMapping
+      this.renderer.shadowMap.enabled = true
+      this.renderer.toneMappingExposure = 0.5
     }
 
     this.controls.addEventListener('start', () => {

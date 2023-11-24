@@ -28,6 +28,8 @@
   import { appStore } from '@/store'
   import userApi from '@/api/user'
   import { Session } from '@/utils/storage'
+  import { Water } from 'three/examples/jsm/objects/Water.js'
+  import { Sky } from 'three/examples/jsm/objects/Sky.js'
   let Three: T
   const ThreeRef = ref<HTMLDivElement>()
   const ThreeContainer = ref<HTMLDivElement>()
@@ -95,6 +97,7 @@
   let oldActive: number // 放大倍数
   let startText = ref('开始')
   let DomType = '' // 当前模型现状
+  const group = new THREE.Group()
   appStore.setTitle('随机抽取一位幸运观众')
 
   onMounted(() => {
@@ -102,8 +105,11 @@
     Three.cameraPositionSet({ x: 0, y: 0, z: 0 }, { x: 0, y: 0, z: 0 })
     // 创建卡片
     nameList.forEach((item, index) => {
-      createDivElement(index)
+      let css3DObject = createDivElement(index)
+      group.add(css3DObject)
     })
+    Three.controlsSelectAdd('one', group)
+    Three.scene.add(group)
     function init() {
       DivCreateEvent()
       createParticle(4000)
@@ -280,7 +286,6 @@
           { x: (row * interval) / 2, y: (col * interval) / 2, z: cameraDistance },
           { x: (row * interval) / 2, y: (col * interval) / 2, z: 0 },
         )
-
         resolve(newList)
       })
     }
@@ -314,6 +319,10 @@
           })
         }
         Three.cameraPositionSet({ x: row, y: col, z: cameraDistance }, { x: row, y: col, z: 0 })
+        Three.animationFrameDelete('SphereSpin')
+        Three.animationFrameAdd('SphereSpin', () => {
+          group.rotation.y += 0.005
+        })
         resolve(true)
       })
     }
@@ -351,9 +360,10 @@
       css3DObject.position.x = Math.random() * 4000 - 2000
       css3DObject.position.y = Math.random() * 4000 - 2000
       css3DObject.position.z = Math.random() * 4000 - 2000
-      Three.scene.add(css3DObject)
+      // Three.scene.add(css3DObject)
       CSS3DObjectList.push(css3DObject)
       domeObjectList.push(elementDiv)
+      return css3DObject
     }
     // 创建粒子
     function createParticle(total: number) {
@@ -390,7 +400,7 @@
           const offsetY = Math.random() * 10 - 5
           const offsetZ = Math.random() * 10 - 5
           gsap.to(positions, {
-            duration,
+            duration: 3,
             ease,
             onUpdate: () => {
               positions[i] += offsetX
