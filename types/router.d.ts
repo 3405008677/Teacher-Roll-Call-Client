@@ -15,13 +15,13 @@ declare global {
     children?: Array<RouteRule>
   }
   interface MyRouter {
-    pid:number
+    pid: number
     path: string
-    component:string
-    icon:string
+    component: string
+    icon: string
     title: string
-    keepAlive:number
-    father:number
-    type:'teacher'|'admin'
+    keepAlive: number
+    father: number
+    type: 'teacher' | 'admin'
   }
 }

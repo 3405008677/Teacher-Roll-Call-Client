@@ -5,7 +5,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js'
 import { FontLoader } from 'three/examples/jsm/loaders/FontLoader'
 import { TextGeometry } from 'three/examples/jsm/geometries/TextGeometry'
 import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
-
+import { RGBELoader } from 'three/examples/jsm/loaders/RGBELoader.js'
 import { gsap } from 'gsap'
 import Stats from 'stats.js'
 /**
@@ -75,7 +75,7 @@ class Three {
     callback: (
       model: THREE.Group<THREE.Object3DEventMap>,
       animations?: THREE.AnimationClip[],
-    ) => void,
+    ) => void | THREE.Group<THREE.Object3DEventMap>,
   ) {
     return new Promise((resolve, reject) => {
       if (url.split('.').at(-1) === 'glb') {
@@ -86,16 +86,22 @@ class Three {
           model.renderOrder = 999 //  相当于z-index
           // model.material.depthTest = false;
           let mixer = this.animationCreate(model)
-          this.modelArr.push({ id: modelId, model, mixer, animation: gltf.animations })
-          callback(model, gltf.animations)
-          this.scene.add(model)
+          let isChange = callback(model, gltf.animations)
+          if (isChange) {
+            this.modelArr.push({ id: modelId, model: isChange, mixer, animation: gltf.animations })
+            this.scene.add(isChange)
+          } else {
+            this.modelArr.push({ id: modelId, model, mixer, animation: gltf.animations })
+            this.scene.add(model)
+          }
+
           resolve(true)
         })
       } else if (url.split('.').at(-1) === 'gltf') {
       }
     })
   }
-  /**
+  /**************************************************************************************************************************
    * 创建动画
    */
   private animationCreate(model: THREE.Group<THREE.Object3DEventMap>) {
@@ -132,7 +138,7 @@ class Three {
     }
     modelItem.nowAnimation = clip
   }
-  /**
+  /**************************************************************************************************************************
    * 修改相机的位置和朝向点
    * @param position 相机的位置
    * @param target 相机朝向的位置
@@ -169,7 +175,7 @@ class Three {
     if (this.type !== 'CSS') return
     this.css3DRender.setSize(this.canvasDom.clientWidth, this.canvasDom.clientHeight)
   }
-  /**
+  /**************************************************************************************************************************
    * 在requestAnimationFrame里面添加执行函数
    * @param id
    * @param callback
@@ -186,8 +192,8 @@ class Three {
       if (id === item.id) this.animationFrameArr.splice(index, 1)
     })
   }
-  /**
-   * 控制器事件
+  /**************************************************************************************************************************
+   * 控制器事件添加
    * @param id
    * @param callbackStart
    * @param callbackEnd
@@ -195,13 +201,17 @@ class Three {
   controlsEventAdd(id: string, callbackStart?: Function, callbackEnd?: Function) {
     this.controlsArr.push({ id, callbackStart, callbackEnd })
   }
+  /**
+   * 控制器事件删除
+   * @param id
+   */
   controlsEventDelete(id: string) {
     this.controlsArr.forEach((item, index) => {
       if (id === item.id) this.controlsArr.splice(index, 1)
     })
   }
-  /**
-   * 控制器选中
+  /**************************************************************************************************************************
+   * 添加可视化控制器
    * @param id
    * @param model
    */
@@ -214,6 +224,10 @@ class Three {
     })
     this.scene.add(transformControls)
   }
+  /**
+   * 删除可视化控制器
+   * @param id
+   */
   controlsSelectDelete(id: string) {
     this.controlsTransformArr.forEach((item, index) => {
       if (id === item.id) {
@@ -223,7 +237,7 @@ class Three {
       }
     })
   }
-  /**
+  /**************************************************************************************************************************
    * 初始化灯光
    */
   private lightCreate() {
@@ -236,7 +250,6 @@ class Three {
   // 初始化基础变量
   private init() {
     this.scene = new THREE.Scene()
-
     this.camera = new THREE.PerspectiveCamera(
       75,
       this.canvasDom.clientWidth / this.canvasDom.clientHeight,
@@ -261,11 +274,11 @@ class Three {
       this.animationFrameAdd('css3DRender', () => {
         this.css3DRender.render(this.scene, this.camera)
       })
-      this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
-      this.renderer.toneMapping = THREE.ACESFilmicToneMapping
-      this.renderer.shadowMap.enabled = true
-      this.renderer.toneMappingExposure = 0.5
     }
+    this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+    this.renderer.shadowMap.enabled = true //启用了阴影映射
+    this.renderer.toneMapping = THREE.ACESFilmicToneMapping // 调整渲染结果颜色映射的一种方法。
+    this.renderer.toneMappingExposure = 1 // 渲染曝光度
 
     this.controls.addEventListener('start', () => {
       this.controlsArr.forEach((item) => {
@@ -390,31 +403,40 @@ class Three {
   }
   floorCreate() {
     const textureLoader = new THREE.TextureLoader()
-    textureLoader.load('static/image/hardwood2_diffuse.jpg', function (map) {
-      map.wrapS = THREE.RepeatWrapping
-      map.wrapT = THREE.RepeatWrapping
-      map.anisotropy = 4
-      map.repeat.set(10, 24)
-      map.colorSpace = THREE.SRGBColorSpace
-      floorMat.map = map
-      floorMat.needsUpdate = true
-    })
-    textureLoader.load('static/image/hardwood2_bump.jpg', function (map) {
-      map.wrapS = THREE.RepeatWrapping
-      map.wrapT = THREE.RepeatWrapping
-      map.anisotropy = 4
-      map.repeat.set(10, 24)
-      floorMat.bumpMap = map
-      floorMat.needsUpdate = true
-    })
-    textureLoader.load('static/image/hardwood2_roughness.jpg', function (map) {
-      map.wrapS = THREE.RepeatWrapping
-      map.wrapT = THREE.RepeatWrapping
-      map.anisotropy = 4
-      map.repeat.set(10, 24)
-      floorMat.roughnessMap = map
-      floorMat.needsUpdate = true
-    })
+    textureLoader.load(
+      'https://github.com/mrdoob/three.js/blob/master/examples/textures/hardwood2_diffuse.jpg',
+      function (map) {
+        map.wrapS = THREE.RepeatWrapping
+        map.wrapT = THREE.RepeatWrapping
+        map.anisotropy = 4
+        map.repeat.set(10, 24)
+        map.colorSpace = THREE.SRGBColorSpace
+        floorMat.map = map
+        floorMat.needsUpdate = true
+      },
+    )
+    textureLoader.load(
+      'https://github.com/mrdoob/three.js/blob/master/examples/textures/hardwood2_bump.jpg',
+      function (map) {
+        map.wrapS = THREE.RepeatWrapping
+        map.wrapT = THREE.RepeatWrapping
+        map.anisotropy = 4
+        map.repeat.set(10, 24)
+        floorMat.bumpMap = map
+        floorMat.needsUpdate = true
+      },
+    )
+    textureLoader.load(
+      'https://github.com/mrdoob/three.js/blob/master/examples/textures/hardwood2_roughness.jpg',
+      function (map) {
+        map.wrapS = THREE.RepeatWrapping
+        map.wrapT = THREE.RepeatWrapping
+        map.anisotropy = 4
+        map.repeat.set(10, 24)
+        floorMat.roughnessMap = map
+        floorMat.needsUpdate = true
+      },
+    )
 
     let floorMat = new THREE.MeshStandardMaterial({
       roughness: 0.8,
@@ -428,6 +450,11 @@ class Three {
     floorMesh.rotation.x = -Math.PI / 2.0
     this.scene.add(floorMesh)
   }
+  /**
+   *
+   * @param config
+   * @returns
+   */
   textCreate(config: {
     text: string
     color?: any
@@ -439,7 +466,7 @@ class Three {
       config.size ? '' : (config.size = 16)
       let textMesh: THREE.Mesh<TextGeometry>
       const fontLoader = new FontLoader()
-      fontLoader.load('/public/font/optimer_bold.typeface.json', (loadedFont) => {
+      fontLoader.load('/public/font/m.json', (loadedFont) => {
         const textGeometry = new TextGeometry(config.text, {
           font: loadedFont,
           size: config.size,
@@ -526,4 +553,4 @@ class Three {
 
 export default Three
 
-export { THREE, OrbitControls, GLTFLoader, CSS3DRenderer, CSS3DObject }
+export { THREE, OrbitControls, GLTFLoader, CSS3DRenderer, CSS3DObject, RGBELoader }

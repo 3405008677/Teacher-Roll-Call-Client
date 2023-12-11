@@ -108,7 +108,7 @@
       let css3DObject = createDivElement(index)
       group.add(css3DObject)
     })
-    Three.controlsSelectAdd('one', group)
+    // Three.controlsSelectAdd('one', group)
     Three.scene.add(group)
     function init() {
       DivCreateEvent()
@@ -319,7 +319,6 @@
           })
         }
         Three.cameraPositionSet({ x: row, y: col, z: cameraDistance }, { x: row, y: col, z: 0 })
-        Three.animationFrameDelete('SphereSpin')
         Three.animationFrameAdd('SphereSpin', () => {
           group.rotation.y += 0.005
         })
@@ -328,6 +327,7 @@
     }
     // 切换形状
     permutationDomSelect = (select: string) => {
+      Three.animationFrameDelete('SphereSpin')
       if (select === 'Sphere') {
         DomType = select
         permutationDomSphere()

@@ -13,11 +13,7 @@
           background-color: rgba(206, 221, 226, 0.7);
         "
       >
-        <el-icon
-          class="mb-20px hvr-wobble-vertical"
-          size="30"
-          @click="$router.push('home')"
-        >
+        <el-icon class="mb-20px hvr-wobble-vertical" size="30" @click="$router.push('home')">
           <HomeFilled />
         </el-icon>
         <el-icon
@@ -27,7 +23,7 @@
         >
           <List />
         </el-icon>
-        <el-icon class="mb-20px hvr-wobble-vertical" size="30">
+        <el-icon class="mb-20px hvr-wobble-vertical" size="30" @click="$router.push('user')">
           <MoreFilled />
         </el-icon>
         <el-icon class="hvr-wobble-vertical" size="30">
