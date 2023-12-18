@@ -451,7 +451,7 @@ class Three {
     this.scene.add(floorMesh)
   }
   /**
-   *
+   * 创建3D文字
    * @param config
    * @returns
    */

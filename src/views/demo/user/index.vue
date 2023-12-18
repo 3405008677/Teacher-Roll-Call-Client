@@ -23,14 +23,15 @@
   ]
   onMounted(() => {
     Three = new T(ThreeCanvas.value!)
-    nameList.forEach(async (item) => {
-      await createCard(item.name, 'card', { x: 0, y: 0, z: 0 })
+    let cardPromiseArr: any = []
+    nameList.forEach((item) => {
+      cardPromiseArr.push(createCard(item.name, 'card', { x: 0, y: 0, z: 0 }))
     })
+    Promise.all(cardPromiseArr)
     permutationDom()
-    function createCard(name: string, type: string, position: position) {
+    function createCard(name: string, type: string, position: position): Promise<any> {
       return new Promise((resolve, reject) => {
         let group = new THREE.Group()
-
         Three.modelCreate(name, `/public/glb/${type}.glb`, (module) => {
           console.log(module)
           module.scale.set(0.007, 0.007, 0.007)
